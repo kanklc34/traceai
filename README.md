@@ -2,6 +2,9 @@
 
 🎬 **Live Demo**  
 [![TraceAI Demo](https://img.youtube.com/vi/im9wt5jDCkE/maxresdefault.jpg)](https://www.youtube.com/watch?v=im9wt5jDCkE)
+
+---
+
 [![Gemma 4](https://img.shields.io/badge/Model-Gemma%204-purple?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/gemma)
 [![API](https://img.shields.io/badge/Google%20AI%20Studio-API-blue?style=for-the-badge&logo=google-cloud&logoColor=white)](https://aistudio.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
