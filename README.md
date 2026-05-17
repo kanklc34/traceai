@@ -142,7 +142,19 @@ You can trigger a live payment service breakdown scenario using either the **"Tr
 # Return to the root folder and run:
 python trigger_demo_spike.py
 ```
+## 🖥️ Offline Mode (Local Gemma 4 via Ollama)
 
+TraceAI supports fully offline inference using Gemma 4 locally:
+
+```bash
+ollama pull gemma4
+```
+
+Then set in `.env`:
+```env
+TRACEAI_USE_OLLAMA=1
+OLLAMA_MODEL=gemma4
+```
 #### What happens next:
 1. The injector simulates three distinct phases: **Latency degradation** (800ms+), **Instability** (flapping error status), and **Critical failure** (spikes of 3000ms+ and error rates).
 2. Within **~5 seconds**, the backend anomaly manager flags the incident and queues it.
