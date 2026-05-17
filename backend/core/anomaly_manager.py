@@ -1,7 +1,7 @@
 import asyncio
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, func, case, delete
 from ..database import async_session
 from ..models.orm import Trace, AIReport, SystemState, AgentStep
@@ -25,17 +25,30 @@ class AnomalyManager:
 
     async def _persist_step(self, step: dict):
         async with async_session() as session:
-            session.add(
-                AgentStep(
-                    incident_id=step["incident_id"],
-                    service=step["service"],
-                    step_order=step["step_order"],
-                    tool_name=step["tool_name"],
-                    tool_input=json.dumps(step.get("tool_input", {})),
-                    tool_output=json.dumps(step.get("tool_output", {})),
-                    status=step.get("status", "complete"),
-                )
+            # Check if this tool step already exists for the incident
+            query = select(AgentStep).where(
+                AgentStep.incident_id == step["incident_id"],
+                AgentStep.tool_name == step["tool_name"]
             )
+            existing = (await session.execute(query)).scalar_one_or_none()
+            
+            if existing:
+                existing.status = step.get("status", "complete")
+                existing.tool_output = json.dumps(step.get("tool_output", {}))  # type: ignore
+                if "tool_input" in step:
+                    existing.tool_input = json.dumps(step["tool_input"])  # type: ignore
+            else:
+                session.add(
+                    AgentStep(
+                        incident_id=step["incident_id"],
+                        service=step["service"],
+                        step_order=step["step_order"],
+                        tool_name=step["tool_name"],
+                        tool_input=json.dumps(step.get("tool_input", {})),
+                        tool_output=json.dumps(step.get("tool_output", {})),
+                        status=step.get("status", "complete"),
+                    )
+                )
             await session.commit()
 
     async def start_worker(self, queue: asyncio.Queue):
@@ -43,7 +56,7 @@ class AnomalyManager:
         while True:
             try:
                 async with async_session() as session:
-                    five_mins_ago = datetime.utcnow() - timedelta(minutes=self.window_minutes)
+                    five_mins_ago = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=self.window_minutes)
                     query = (
                         select(
                             Trace.service,
@@ -57,7 +70,7 @@ class AnomalyManager:
 
                     for row in (await session.execute(query)).all():
                         last_alert = self.alert_suppression.get(row.service)
-                        if last_alert and datetime.utcnow() - last_alert < timedelta(minutes=2):
+                        if last_alert and datetime.now(timezone.utc).replace(tzinfo=None) - last_alert < timedelta(minutes=2):
                             continue
 
                         error_rate = row.errors / row.total if row.total > 0 else 0
@@ -70,10 +83,10 @@ class AnomalyManager:
                                 "value": f"{error_rate:.2%}"
                                 if error_rate > self.threshold_error_rate
                                 else f"{row.avg_latency:.2f}ms",
-                                "timestamp": datetime.utcnow().isoformat(),
+                                "timestamp": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
                             }
                             queue.put_nowait(event)
-                            self.alert_suppression[row.service] = datetime.utcnow()
+                            self.alert_suppression[row.service] = datetime.now(timezone.utc).replace(tzinfo=None)
                             print(f"[INCIDENT] Anomaly on {row.service} -> queued")
             except Exception as e:
                 print(f"[ERROR] Detector failed: {e}")

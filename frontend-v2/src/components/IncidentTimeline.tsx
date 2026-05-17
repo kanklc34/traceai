@@ -9,6 +9,7 @@ const PHASES = [
 ];
 
 function phaseIndex(steps: AgentStep[], analyzing: boolean, hasReport: boolean): number {
+  if (hasReport && !analyzing) return 4; // Complete and turn all phases green!
   if (hasReport) return 3;
   if (steps.some((s) => s.tool_name === 'gemma_synthesize' && s.status === 'running')) return 2;
   if (steps.length > 0 || analyzing) return 1;
