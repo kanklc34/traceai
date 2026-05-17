@@ -80,7 +80,7 @@ To prevent hallucinations, the SRE Agent does not inspect code or logs blindly. 
 
 ```bash
 # Clone the repository
-git clone [https://github.com/kanklc34/traceai]
+git clone https://github.com/kanklc34/traceai
 cd Trace-AI
 
 # Create and activate virtual environment
