@@ -165,43 +165,65 @@ class GemmaAgent:
         return self._evidence_based_rca(evidence, service, degraded=True), "evidence-only"
 
     async def _call_gemma(self, model_name: str, prompt: str) -> dict | None:
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{model_name}:generateContent?key={self.api_key}"
-        )
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                json={
-                    "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {
-                        "temperature": 0.1,
-                        "maxOutputTokens": 1024,
+        use_ollama = os.getenv("TRACEAI_USE_OLLAMA", "0") == "1"
+        
+        if use_ollama:
+            url = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+            ollama_model = os.getenv("OLLAMA_MODEL", "gemma4:9b")
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url,
+                    json={
+                        "model": ollama_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": 0.1,
+                            "num_predict": 1024
+                        }
                     },
-                },
-                timeout=60.0,
+                    timeout=120.0,
+                )
+            if response.status_code != 200:
+                print(f"[OLLAMA] HTTP {response.status_code}: {response.text[:300]}")
+                return None
+            data = response.json()
+            text = data.get("response", "").strip()
+        else:
+            url = (
+                f"https://generativelanguage.googleapis.com/v1beta/models/"
+                f"{model_name}:generateContent?key={self.api_key}"
             )
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url,
+                    json={
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {
+                            "temperature": 0.1,
+                            "maxOutputTokens": 1024,
+                        },
+                    },
+                    timeout=60.0,
+                )
+            if response.status_code != 200:
+                print(f"[GEMMA] HTTP {response.status_code}: {response.text[:300]}")
+                return None
+            data = response.json()
+            candidates = data.get("candidates") or []
+            if not candidates:
+                print("[GEMMA] No candidates in response")
+                return None
+            parts = candidates[0].get("content", {}).get("parts") or []
+            text = "".join(p.get("text", "") for p in parts).strip()
 
-        if response.status_code != 200:
-            print(f"[GEMMA] HTTP {response.status_code}: {response.text[:300]}")
-            return None
-
-        data = response.json()
-        candidates = data.get("candidates") or []
-        if not candidates:
-            print("[GEMMA] No candidates in response")
-            return None
-
-        parts = candidates[0].get("content", {}).get("parts") or []
-        text = "".join(p.get("text", "") for p in parts).strip()
         if not text:
-            print("[GEMMA] Empty text in response")
+            print("[OLLAMA/GEMMA] Empty response")
             return None
-
         parsed = self._extract_json_object(text)
         if parsed:
             return parsed
-        print(f"[GEMMA] JSON parse failed, tail: {text[-300:]}")
+        print(f"[OLLAMA/GEMMA] JSON parse failed, tail: {text[-300:]}")
         return None
 
     def _extract_json_object(self, text: str) -> dict | None:
