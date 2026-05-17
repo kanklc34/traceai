@@ -1,0 +1,38 @@
+# Environments
+.env
+.env.local
+.env.*.local
+
+# Python
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.pyrightpy/
+
+# Node / Vite
+node_modules/
+dist/
+build/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Databases & logs
+*.db
+*.sqlite
+*.log
+traceai.db

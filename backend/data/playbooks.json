@@ -1,0 +1,23 @@
+[
+  {
+    "id": "pb-001",
+    "symptoms": ["payment-service", "error_rate", "checkout_flow", "hotfix"],
+    "title": "Connection pool leak after hotfix",
+    "pattern": "Errors spike within 2h of deploy; latency climbs above 800ms; checkout_flow dominates failures.",
+    "remediation": "kubectl rollout undo deployment/payment-service -n production"
+  },
+  {
+    "id": "pb-002",
+    "symptoms": ["auth-service", "latency", "identity"],
+    "title": "Upstream identity provider degradation",
+    "pattern": "Elevated latency without deploy change; intermittent timeouts on token validation.",
+    "remediation": "Scale auth-service replicas and enable circuit breaker on identity provider."
+  },
+  {
+    "id": "pb-003",
+    "symptoms": ["api-gateway", "thread", "spike"],
+    "title": "Request spike exhausting thread pool",
+    "pattern": "Sudden traffic spike; gateway latency rises before downstream errors.",
+    "remediation": "Enable rate limiting and scale api-gateway horizontally."
+  }
+]

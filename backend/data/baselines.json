@@ -1,0 +1,26 @@
+{
+  "payment-service": {
+    "error_rate": 0.02,
+    "avg_latency_ms": 120,
+    "p95_latency_ms": 280,
+    "primary_operation": "checkout_flow"
+  },
+  "auth-service": {
+    "error_rate": 0.01,
+    "avg_latency_ms": 85,
+    "p95_latency_ms": 200,
+    "primary_operation": "token_validate"
+  },
+  "api-gateway": {
+    "error_rate": 0.005,
+    "avg_latency_ms": 45,
+    "p95_latency_ms": 120,
+    "primary_operation": "route_request"
+  },
+  "inventory-service": {
+    "error_rate": 0.015,
+    "avg_latency_ms": 95,
+    "p95_latency_ms": 220,
+    "primary_operation": "stock_lookup"
+  }
+}

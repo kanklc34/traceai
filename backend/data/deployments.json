@@ -1,0 +1,30 @@
+{
+  "payment-service": {
+    "version": "v2.4.1-hotfix",
+    "deployed_at": "2 hours ago",
+    "status": "deployed",
+    "commit": "a1b2c3",
+    "author": "platform-team"
+  },
+  "auth-service": {
+    "version": "v1.2.0",
+    "deployed_at": "4 days ago",
+    "status": "stable",
+    "commit": "z9y8x7",
+    "author": "identity-team"
+  },
+  "api-gateway": {
+    "version": "v1.0.5",
+    "deployed_at": "10 days ago",
+    "status": "stable",
+    "commit": "b2c3d4",
+    "author": "edge-team"
+  },
+  "inventory-service": {
+    "version": "v3.1.2",
+    "deployed_at": "1 day ago",
+    "status": "stable",
+    "commit": "f4e5d6",
+    "author": "catalog-team"
+  }
+}
