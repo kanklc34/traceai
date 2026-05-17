@@ -1,7 +1,7 @@
 # 🔮 TraceAI: Gemma 4-Powered Incident SRE Agent
 
 🎬 **Live Demo**  
-[![TraceAI Demo](https://img.youtube.com/vi/im9wt5jDCkE/maxresdefault.jpg)](https://www.youtube.com/watch?v=NoZA7Yotsok)
+[![TraceAI Demo]([https://img.youtube.com/vi/im9wt5jDCkE/maxresdefault.jpg](https://www.youtube.com/watch?v=NoZA7Yotsok))]
 
 ---
 
